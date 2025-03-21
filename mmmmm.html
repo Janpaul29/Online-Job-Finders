@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Job Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
+                url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80') no-repeat center center;
+            background-size: cover;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #003366;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            left: -280px;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+            transition: left 0.4s ease-in-out;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 15px 20px;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .menu-toggle {
+            position: fixed;
+            left: 10px;
+            top: 15px;
+            background: #003366;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 60px auto;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .job-listings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .job-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+
+        .job-card:hover {
+            transform: scale(1.03);
+        }
+
+        .job-card h3 {
+            color: #003366;
+            font-size: 20px;
+        }
+
+        .apply-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .apply-btn:hover {
+            background: #e68900;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #003366;
+            color: white;
+            margin-top: 40px;
+            font-size: 16px;
+        }
+
+        .form-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container input,
+        .form-container textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .form-container button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .form-container button:hover {
+            background: #45a049;
+        }
+
+        .job-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .job-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .edit-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        /* Button & Link Transitions */
+        button, .sidebar a {
+            transition: all 0.3s ease;
+        }
+
+        button:active, .sidebar a:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+
+    <nav class="sidebar">
+        <a href="#" onclick="autoCloseSidebar()">Home</a>
+        <a href="#" onclick="autoCloseSidebar()">About</a>
+        <a href="#" onclick="autoCloseSidebar()">Post a Job</a>
+        <a href="#" onclick="autoCloseSidebar()">Contact</a>
+        <a href="#" onclick="autoCloseSidebar()">Profile</a>
+        <a href="#" onclick="autoCloseSidebar()">Login</a>
+        <a href="#" onclick="autoCloseSidebar()">Register</a>
+    </nav>
+
+    <div class="container">
+        <h2>Job Listings</h2>
+        <section class="job-listings" id="job-listings"></section>
+
+        <!-- Post a Job Form -->
+        <div class="form-container" id="post-job-form">
+            <h3>Post a New Job</h3>
+            <input type="text" id="job-title" placeholder="Job Title" required />
+            <input type="text" id="company-name" placeholder="Company Name" required />
+            <input type="text" id="job-location" placeholder="Location" required />
+            <textarea id="job-description" rows="4" placeholder="Job Description" required></textarea>
+            <button onclick="postJob()">Post Job</button>
+        </div>
+    </div>
+
+    <footer>&copy; 2025 Online Job Finder. All rights reserved.</footer>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector(".sidebar").classList.toggle("active");
+        }
+
+        function autoCloseSidebar() {
+            setTimeout(() => {
+                document.querySelector(".sidebar").classList.remove("active");
+            }, 3000);
+        }
+
+        const jobs = [
+            { title: "Software Engineer", company: "Google", location: "San Francisco, CA", description: "Develop scalable applications and optimize system performance." },
+            { title: "Marketing Manager", company: "Amazon", location: "Seattle, WA", description: "Lead marketing campaigns and drive customer engagement." },
+            { title: "Data Scientist", company: "Microsoft", location: "Redmond, WA", description: "Analyze large datasets to improve business decisions." },
+            { title: "UX Designer", company: "Adobe", location: "San Jose, CA", description: "Design intuitive and beautiful digital experiences." },
+            { title: "Cybersecurity Specialist", company: "Cisco", location: "Dallas, TX", description: "Protect networks and infrastructure from cyber threats." }
+        ];
+
+        let editIndex = null;
+
+        function displayJobs() {
+            const jobListings = document.getElementById("job-listings");
+            jobListings.innerHTML = "";
+            jobs.forEach((job, index) => {
+                const jobCard = document.createElement("div");
+                jobCard.classList.add("job-card");
+                jobCard.innerHTML = `
+                    <h3>${job.title}</h3>
+                    <p><strong>Company:</strong> ${job.company}</p>
+                    <p><strong>Location:</strong> ${job.location}</p>
+                    <p>${job.description}</p>
+                    <div class="job-buttons">
+                        <button class="edit-btn" onclick="editJob(${index})">Edit</button>
+                        <button class="delete-btn" onclick="deleteJob(${index})">Delete</button>
+                    </div>
+                `;
+                jobListings.appendChild(jobCard);
+            });
+        }
+
+        function postJob() {
+            const title = document.getElementById("job-title").value;
+            const company = document.getElementById("company-name").value;
+            const location = document.getElementById("job-location").value;
+            const description = document.getElementById("job-description").value;
+
+            if (title && company && location && description) {
+                if (editIndex !== null) {
+                    jobs[editIndex] = { title, company, location, description };
+                    editIndex = null;
+                } else {
+                    jobs.push({ title, company, location, description });
+                }
+                displayJobs();
+                resetForm();
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("job-title").value = "";
+            document.getElementById("company-name").value = "";
+            document.getElementById("job-location").value = "";
+            document.getElementById("job-description").value = "";
+        }
+
+        function editJob(index) {
+            const job = jobs[index];
+            document.getElementById("job-title").value = job.title;
+            document.getElementById("company-name").value = job.company;
+            document.getElementById("job-location").value = job.location;
+            document.getElementById("job-description").value = job.description;
+            editIndex = index;
+        }
+
+        function deleteJob(index) {
+            jobs.splice(index, 1);
+            displayJobs();
+        }
+
+        displayJobs();
+    </script>
+</body>
+
+</html>
